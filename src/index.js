@@ -8,6 +8,7 @@ import { ApolloLink } from "apollo-link";
 import { HttpLink } from "apollo-link-http";
 import { onError } from "apollo-link-error";
 import { InMemoryCache } from "apollo-cache-inmemory";
+import { RetryLink } from "apollo-link-retry";
 
 import registerServiceWorker from "./registerServiceWorker";
 import App from "./App";
@@ -25,6 +26,7 @@ const httpLink = new HttpLink({
   },
 });
 
+// Errors for link
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
     console.log("GraphQL Error");
@@ -34,8 +36,9 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     console.log("Network Error");
   }
 });
-// Create links for error control
-const link = ApolloLink.from([errorLink, httpLink]);
+
+// Create link for error control
+const link = ApolloLink.from([new RetryLink(), errorLink, httpLink]);
 
 const cache = new InMemoryCache();
 // Create client class for Apollo
