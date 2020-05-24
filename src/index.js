@@ -22,9 +22,7 @@ const httpLink = new HttpLink({
     authorization: `Bearer ${process.env.REACT_APP_GITHUB_PERSONAL_ACCESS_TOKEN}`,
   },
 });
-
 const cache = new InMemoryCache();
-
 const client = new ApolloClient({
   link: httpLink,
   cache,
