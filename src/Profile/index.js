@@ -6,7 +6,8 @@ import { Query } from "react-apollo";
 import RepositoryList from "../Repository";
 // Page loading animation
 import Loading from "../Loading";
-
+// Error handling
+import ErrorMessage from "../Error";
 // Query for user repositories
 const GET_REPOSITORIES_OF_CURRENT_USER = gql`
   {
@@ -43,7 +44,11 @@ const GET_REPOSITORIES_OF_CURRENT_USER = gql`
 // Display repository of user
 const Profile = () => (
   <Query query={GET_REPOSITORIES_OF_CURRENT_USER}>
-    {({ data, loading }) => {
+    {({ data, loading, error }) => {
+      if (error) {
+        return <ErrorMessage error={error} />;
+      }
+
       const { viewer } = data;
 
       // If data still being retrieved, display loader
