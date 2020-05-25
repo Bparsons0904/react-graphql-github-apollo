@@ -5,7 +5,7 @@ import Button from "../../Button";
 // Allow Graphql queries
 import gql from "graphql-tag";
 // Allow Graphql mutations
-import { Mutation } from "react-apollo";
+import { Mutation, graphql } from "react-apollo";
 
 import "../style.css";
 
@@ -96,7 +96,7 @@ const RepositoryItem = ({
                     className={"RepositoryItem-title-action"}
                     onClick={removeStar}
                   >
-                    {stargazers.totalCount} Star
+                    {stargazers.totalCount} Unstar
                   </Button>
                 )}
               </Mutation>
