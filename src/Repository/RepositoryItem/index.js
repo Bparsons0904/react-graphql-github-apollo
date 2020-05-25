@@ -1,11 +1,63 @@
 import React from "react";
-// Create clickable links
+// Custom React Components
 import Link from "../../Link";
+import Button from "../../Button";
+// Allow Graphql queries
+import gql from "graphql-tag";
+// Allow Graphql mutations
+import { Mutation } from "react-apollo";
 
 import "../style.css";
 
-// Data obtained from query for repository items
+// Add star to repo
+const STAR_REPOSITORY = gql`
+  mutation($id: ID!) {
+    addStar(input: { starrableId: $id }) {
+      starrable {
+        id
+        viewerHasStarred
+      }
+    }
+  }
+`;
+
+// Remove star from repo
+const REMOVE_STAR_REPOSITORY = gql`
+  mutation($id: ID!) {
+    removeStar(input: { starrableId: $id }) {
+      starrable {
+        id
+        viewerHasStarred
+      }
+    }
+  }
+`;
+
+// Subscribe to repo
+const ADD_SUBSCRIPTION = gql`
+  mutation($id: ID!) {
+    updateSubscription(input: { subscribableId: $id, state: SUBSCRIBED }) {
+      subscribable {
+        viewerSubscription
+      }
+    }
+  }
+`;
+
+// Unsubscribe from repo
+const REMOVE_SUBSCRIPTION = gql`
+  mutation($id: ID!) {
+    updateSubscription(input: { subscribableId: $id, state: UNSUBSCRIBED }) {
+      subscribable {
+        viewerSubscription
+      }
+    }
+  }
+`;
+
+// Data obtained from query from repository items
 const RepositoryItem = ({
+  id,
   name,
   url,
   descriptionHTML,
@@ -21,9 +73,64 @@ const RepositoryItem = ({
       <h2>
         <Link href={url}>{name}</Link>
       </h2>
-
-      <div className="RepositoryItem-title-action">
-        {stargazers.totalCount} Stars
+      <div>
+        {/* If viewer has not starred repo display remove star button else display
+        add star button */}
+        {!viewerHasStarred ? (
+          <Mutation mutation={STAR_REPOSITORY} variables={{ id }}>
+            {(addStar, { data, loading, error }) => (
+              <Button
+                className={"RepositoryItem-title-action"}
+                onClick={addStar}
+              >
+                {stargazers.totalCount} Star
+              </Button>
+            )}
+          </Mutation>
+        ) : (
+          <span>
+            {
+              <Mutation mutation={REMOVE_STAR_REPOSITORY} variables={{ id }}>
+                {(removeStar, { data, loading, error }) => (
+                  <Button
+                    className={"RepositoryItem-title-action"}
+                    onClick={removeStar}
+                  >
+                    {stargazers.totalCount} Star
+                  </Button>
+                )}
+              </Mutation>
+            }
+          </span>
+        )}
+        {/* If viewer has not subscribed to repo, display subscribable button else display remove subscription */}
+        {viewerSubscription === "UNSUBSCRIBED" ? (
+          <Mutation mutation={ADD_SUBSCRIPTION} variables={{ id }}>
+            {(addSubscription, { data, loading, error }) => (
+              <Button
+                className={"RepositoryItem-title-action"}
+                onClick={addSubscription}
+              >
+                {watchers.totalCount} Subscribe
+              </Button>
+            )}
+          </Mutation>
+        ) : (
+          <span>
+            {
+              <Mutation mutation={REMOVE_SUBSCRIPTION} variables={{ id }}>
+                {(removeSubcription, { data, loading, error }) => (
+                  <Button
+                    className={"RepositoryItem-title-action"}
+                    onClick={removeSubcription}
+                  >
+                    {watchers.totalCount} Unsubscribe
+                  </Button>
+                )}
+              </Mutation>
+            }
+          </span>
+        )}
       </div>
     </div>
 
