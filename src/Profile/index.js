@@ -2,8 +2,8 @@ import React from "react";
 // Graphql and APollo modules
 import gql from "graphql-tag";
 import { graphql } from "react-apollo";
-// Display repository
-import RepositoryList from "../Repository";
+// Display repository, get query fragments
+import RepositoryList, { REPOSITORY_FRAGMENT } from "../Repository";
 // Page loading animation
 import Loading from "../Loading";
 // Error handling
@@ -16,30 +16,14 @@ const GET_REPOSITORIES_OF_CURRENT_USER = gql`
       repositories(first: 5, orderBy: { direction: DESC, field: STARGAZERS }) {
         edges {
           node {
-            id
-            name
-            url
-            descriptionHTML
-            primaryLanguage {
-              name
-            }
-            owner {
-              login
-              url
-            }
-            stargazers {
-              totalCount
-            }
-            viewerHasStarred
-            watchers {
-              totalCount
-            }
-            viewerSubscription
+            ...repository
           }
         }
       }
     }
   }
+
+  ${REPOSITORY_FRAGMENT}
 `;
 
 // Display repository of user
