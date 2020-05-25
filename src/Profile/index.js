@@ -52,12 +52,13 @@ const Profile = () => (
         return <Loading />;
       }
 
-      // Display list of repos
+      // Display list of user repos
       return (
         <RepositoryList
           loading={loading}
           repositories={viewer.repositories}
           fetchMore={fetchMore}
+          entry={"viewer"}
         />
       );
     }}

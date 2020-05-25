@@ -49,6 +49,7 @@ const WATCH_REPOSITORY = gql`
   }
 `;
 
+// Add repository star by current user
 const updateAddStar = (
   client,
   {
@@ -59,13 +60,16 @@ const updateAddStar = (
     },
   }
 ) => {
+  // Get current cached values
   const repository = client.readFragment({
     id: `Repository:${id}`,
     fragment: REPOSITORY_FRAGMENT,
   });
 
+  // Increment total count by plus 1
   const totalCount = repository.stargazers.totalCount + 1;
 
+  // Update cache with current value
   client.writeFragment({
     id: `Repository:${id}`,
     fragment: REPOSITORY_FRAGMENT,
@@ -79,6 +83,7 @@ const updateAddStar = (
   });
 };
 
+// remove repository star by current user
 const updateRemoveStar = (
   client,
   {
@@ -89,13 +94,14 @@ const updateRemoveStar = (
     },
   }
 ) => {
+  // Get current cached values
   const repository = client.readFragment({
     id: `Repository:${id}`,
     fragment: REPOSITORY_FRAGMENT,
   });
-
+  // Increment total count by minus 1
   const totalCount = repository.stargazers.totalCount - 1;
-
+  // Update cache with current value
   client.writeFragment({
     id: `Repository:${id}`,
     fragment: REPOSITORY_FRAGMENT,
@@ -109,14 +115,17 @@ const updateRemoveStar = (
   });
 };
 
+// Variable to store subscription option values
 const VIEWER_SUBSCRIPTIONS = {
   SUBSCRIBED: "SUBSCRIBED",
   UNSUBSCRIBED: "UNSUBSCRIBED",
 };
 
+// Set value of subscription
 const isWatch = (viewerSubscription) =>
   viewerSubscription === VIEWER_SUBSCRIPTIONS.SUBSCRIBED;
 
+// Update watch status
 const updateWatch = (
   client,
   {
@@ -127,17 +136,20 @@ const updateWatch = (
     },
   }
 ) => {
+  // Get current cached values
   const repository = client.readFragment({
     id: `Repository:${id}`,
     fragment: REPOSITORY_FRAGMENT,
   });
 
+  // Increase or decrease watch count based on new subscription status
   let { totalCount } = repository.watchers;
   totalCount =
     viewerSubscription === VIEWER_SUBSCRIPTIONS.SUBSCRIBED
       ? totalCount + 1
       : totalCount - 1;
 
+  // Update cache with current value
   client.writeFragment({
     id: `Repository:${id}`,
     fragment: REPOSITORY_FRAGMENT,

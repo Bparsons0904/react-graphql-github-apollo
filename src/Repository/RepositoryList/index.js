@@ -6,23 +6,22 @@ import RepositoryItem from "../RepositoryItem";
 import "../style.css";
 
 // Update cache of results to be displayed
-const updateQuery = (previousResult, { fetchMoreResult }) => {
+const getUpdateQuery = (entry) => (previousResult, { fetchMoreResult }) => {
   // Display previous results if fetch does not retrieve more
   if (!fetchMoreResult) {
     return previousResult;
   }
-
   // Display previous results and newly fetched results
   return {
     ...previousResult,
-    viewer: {
-      ...previousResult.viewer,
+    [entry]: {
+      ...previousResult[entry],
       repositories: {
-        ...previousResult.viewer.repositories,
-        ...fetchMoreResult.viewer.repositories,
+        ...previousResult[entry].repositories,
+        ...fetchMoreResult[entry].repositories,
         edges: [
-          ...previousResult.viewer.repositories.edges,
-          ...fetchMoreResult.viewer.repositories.edges,
+          ...previousResult[entry].repositories.edges,
+          ...fetchMoreResult[entry].repositories.edges,
         ],
       },
     },
@@ -30,7 +29,7 @@ const updateQuery = (previousResult, { fetchMoreResult }) => {
 };
 
 // Loop through list of repositories and generate each item
-const RepositoryList = ({ repositories, loading, fetchMore }) => (
+const RepositoryList = ({ repositories, loading, fetchMore, entry }) => (
   <Fragment>
     {/* Loop through the nodes, create repo item for each  */}
     {repositories.edges.map(({ node }) => (
@@ -46,7 +45,7 @@ const RepositoryList = ({ repositories, loading, fetchMore }) => (
       variables={{
         cursor: repositories.pageInfo.endCursor,
       }}
-      updateQuery={updateQuery}
+      updateQuery={getUpdateQuery(entry)}
       fetchMore={fetchMore}
     >
       Repositories
