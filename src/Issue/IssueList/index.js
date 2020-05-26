@@ -2,10 +2,14 @@ import React from "react";
 // Apollo components
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
+
+import { withState } from "recompose";
 // Displays each individual issue
 import IssueItem from "../IssueItem";
 // Loading animation
 import Loading from "../../Loading";
+// Get next group of issues
+import FetchMore from "../../FetchMore";
 // Component for displaying error messages
 import ErrorMessage from "../../Error";
 // Borderless button
@@ -13,10 +17,15 @@ import { ButtonUnobtrusive } from "../../Button";
 import "./style.css";
 
 // Query to retrieve issues for each repo
-const GET_ISSUES_OF_REPOSITORY = gql`
-  query($repositoryOwner: String!, $repositoryName: String!) {
+export const GET_ISSUES_OF_REPOSITORY = gql`
+  query(
+    $repositoryOwner: String!
+    $repositoryName: String!
+    $issueState: IssueState!
+    $cursor: String
+  ) {
     repository(name: $repositoryName, owner: $repositoryOwner) {
-      issues(first: 5) {
+      issues(first: 5, states: [$issueState], after: $cursor) {
         edges {
           node {
             id
@@ -26,6 +35,10 @@ const GET_ISSUES_OF_REPOSITORY = gql`
             url
             bodyHTML
           }
+        }
+        pageInfo {
+          endCursor
+          hasNextPage
         }
       }
     }
@@ -56,84 +69,132 @@ const TRANSITION_STATE = {
 // Variable to determine is stats should be visible
 const isShow = (issueState) => issueState !== ISSUE_STATES.NONE;
 
-// Query database for issues with each repo and display
-class Issues extends React.Component {
-  // Default to no issues displayed
-  state = {
-    issueState: ISSUE_STATES.NONE,
-  };
-
-  // On button click, determine next state to display
-  onChangeIssueState = (nextIssueState) => {
-    this.setState({ issueState: nextIssueState });
-  };
-
-  render() {
-    const { issueState } = this.state;
-    const { repositoryOwner, repositoryName } = this.props;
-
-    return (
-      <div className="Issues">
-        {/* Toggle through available states of issues */}
-        <ButtonUnobtrusive
-          onClick={() => this.onChangeIssueState(TRANSITION_STATE[issueState])}
-        >
-          {TRANSITION_LABELS[issueState]}
-        </ButtonUnobtrusive>
-
-        {isShow(issueState) && (
-          <Query
-            query={GET_ISSUES_OF_REPOSITORY}
-            variables={{
-              repositoryOwner,
-              repositoryName,
-            }}
-          >
-            {({ data, loading, error }) => {
-              // Display error message if error returned
-              if (error) {
-                return <ErrorMessage error={error} />;
-              }
-
-              // Init repository object to values from data
-              const { repository } = data;
-
-              // Display loading animation if loading and no loaded repository
-              if (loading && !repository) {
-                return <Loading />;
-              }
-
-              // Display issues that match currently selected state.
-              const filteredRepository = {
-                issues: {
-                  edges: repository.issues.edges.filter(
-                    (issue) => issue.node.state === issueState
-                  ),
-                },
-              };
-
-              // If not issues for current state, display message
-              if (!filteredRepository.issues.edges.length) {
-                return <div className="IssueList">No issues ...</div>;
-              }
-
-              // Display issues using Issuelist component
-              return <IssueList issues={filteredRepository.issues} />;
-            }}
-          </Query>
-        )}
-      </div>
-    );
+// Update cache of results to be displayed
+const updateQuery = (previousResult, { fetchMoreResult }) => {
+  // Display previous results if fetch does not retrieve more
+  if (!fetchMoreResult) {
+    return previousResult;
   }
-}
+  // Display previous results and newly fetched results
+  return {
+    ...previousResult,
+    repository: {
+      ...previousResult.repository,
+      issues: {
+        ...previousResult.repository.issues,
+        ...fetchMoreResult.repository.issues,
+        edges: [
+          ...previousResult.repository.issues.edges,
+          ...fetchMoreResult.repository.issues.edges,
+        ],
+      },
+    },
+  };
+};
 
-// Loop through issues and display
-const IssueList = ({ issues }) => (
-  <div className="IssueList">
-    {issues.edges.map(({ node }) => (
-      <IssueItem key={node.id} issue={node} />
-    ))}
+// Query database for issues with each repo and display
+const Issues = ({
+  repositoryOwner,
+  repositoryName,
+  issueState,
+  onChangeIssueState,
+}) => (
+  <div className="Issues">
+    <ButtonUnobtrusive
+      onClick={() => onChangeIssueState(TRANSITION_STATE[issueState])}
+    >
+      {TRANSITION_LABELS[issueState]}
+    </ButtonUnobtrusive>
+
+    {/* If issue is in open or closed state, display issues */}
+    {isShow(issueState) && (
+      <Query
+        query={GET_ISSUES_OF_REPOSITORY}
+        variables={{
+          repositoryOwner,
+          repositoryName,
+          issueState,
+        }}
+        notifyOnNetworkStatusChange={true}
+      >
+        {({ data, loading, error, fetchMore }) => {
+          // If error display error message
+          if (error) {
+            return <ErrorMessage error={error} />;
+          }
+
+          // Set repository object to fetched data
+          const { repository } = data;
+
+          // If loading and no repository display loading animation
+          if (loading && !repository) {
+            return <Loading />;
+          }
+
+          // Filter issues based on current state selection
+          const filteredRepository = {
+            issues: {
+              edges: repository.issues.edges.filter(
+                (issue) => issue.node.state === issueState
+              ),
+            },
+          };
+
+          // If no issues for current state, display no issues message
+          if (!filteredRepository.issues.edges.length) {
+            return <div className="IssueList">No issues ...</div>;
+          }
+
+          return (
+            <IssueList
+              issues={repository.issues}
+              loading={loading}
+              repositoryOwner={repositoryOwner}
+              repositoryName={repositoryName}
+              issueState={issueState}
+              fetchMore={fetchMore}
+            />
+          );
+        }}
+      </Query>
+    )}
   </div>
 );
 
-export default Issues;
+const IssueList = ({
+  issues,
+  loading,
+  repositoryOwner,
+  repositoryName,
+  issueState,
+  fetchMore,
+}) => (
+  <div className="IssueList">
+    {/* Loop through issues, create element for each node */}
+    {issues.edges.map(({ node }) => (
+      <IssueItem key={node.id} issue={node} />
+    ))}
+
+    {/* Generate button to fetch next group of issues. */}
+    <FetchMore
+      loading={loading}
+      hasNextPage={issues.pageInfo.hasNextPage}
+      variables={{
+        cursor: issues.pageInfo.endCursor,
+        repositoryOwner,
+        repositoryName,
+        issueState,
+      }}
+      updateQuery={updateQuery}
+      fetchMore={fetchMore}
+    >
+      Issues
+    </FetchMore>
+  </div>
+);
+
+export default withState(
+  "issueState",
+  "onChangeIssueState",
+  ISSUE_STATES.NONE
+)(Issues);

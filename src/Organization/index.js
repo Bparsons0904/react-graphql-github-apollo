@@ -1,7 +1,7 @@
 import React from "react";
 // Graphql and APollo modules
 import gql from "graphql-tag";
-import { Query, skip } from "react-apollo";
+import { Query } from "react-apollo";
 // Display repository, get query fragments
 import RepositoryList, { REPOSITORY_FRAGMENT } from "../Repository";
 // Page loading animation
