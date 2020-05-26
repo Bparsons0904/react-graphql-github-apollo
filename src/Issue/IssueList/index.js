@@ -1,8 +1,8 @@
 import React from "react";
 // Apollo components
-import { Query } from "react-apollo";
+import { Query, ApolloConsumer } from "react-apollo";
 import gql from "graphql-tag";
-
+// Allow for server side filtering
 import { withState } from "recompose";
 // Displays each individual issue
 import IssueItem from "../IssueItem";
@@ -92,6 +92,27 @@ const updateQuery = (previousResult, { fetchMoreResult }) => {
   };
 };
 
+// Prefetch issue when issue button is hovered over
+const prefetchIssues = (
+  client,
+  repositoryOwner,
+  repositoryName,
+  issueState
+) => {
+  const nextIssueState = TRANSITION_STATE[issueState];
+
+  if (isShow(nextIssueState)) {
+    client.query({
+      query: GET_ISSUES_OF_REPOSITORY,
+      variables: {
+        repositoryOwner,
+        repositoryName,
+        issueState: nextIssueState,
+      },
+    });
+  }
+};
+
 // Query database for issues with each repo and display
 const Issues = ({
   repositoryOwner,
@@ -100,12 +121,13 @@ const Issues = ({
   onChangeIssueState,
 }) => (
   <div className="Issues">
-    <ButtonUnobtrusive
-      onClick={() => onChangeIssueState(TRANSITION_STATE[issueState])}
-    >
-      {TRANSITION_LABELS[issueState]}
-    </ButtonUnobtrusive>
-
+    {/* Generate prefetching button to display issues */}
+    <IssueFilter
+      repositoryOwner={repositoryOwner}
+      repositoryName={repositoryName}
+      issueState={issueState}
+      onChangeIssueState={onChangeIssueState}
+    />
     {/* If issue is in open or closed state, display issues */}
     {isShow(issueState) && (
       <Query
@@ -161,6 +183,30 @@ const Issues = ({
   </div>
 );
 
+// Display show issue button
+const IssueFilter = ({
+  issueState,
+  onChangeIssueState,
+  repositoryOwner,
+  repositoryName,
+}) => (
+  <ApolloConsumer>
+    {(client) => (
+      <ButtonUnobtrusive
+        // On click toggle state of issue to display
+        onClick={() => onChangeIssueState(TRANSITION_STATE[issueState])}
+        // On mouseover, prefetch issues
+        onMouseOver={() =>
+          prefetchIssues(client, repositoryOwner, repositoryName, issueState)
+        }
+      >
+        {TRANSITION_LABELS[issueState]}
+      </ButtonUnobtrusive>
+    )}
+  </ApolloConsumer>
+);
+
+// Display list
 const IssueList = ({
   issues,
   loading,
