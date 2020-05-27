@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
 
-const REPOSITORY_FRAGMENT = gql`
+export const REPOSITORY_FRAGMENT = gql`
   fragment repository on Repository {
     id
     name
@@ -21,6 +21,20 @@ const REPOSITORY_FRAGMENT = gql`
       totalCount
     }
     viewerSubscription
+  }
+`;
+
+// Fragment to get Issue for comment update
+export const GET_ISSUE_OF_REPOSITORY = gql`
+  fragment issue on Issue {
+    id
+    comments {
+      edges {
+        node {
+          body
+        }
+      }
+    }
   }
 `;
 

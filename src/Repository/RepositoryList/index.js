@@ -3,7 +3,9 @@ import React, { Fragment } from "react";
 import FetchMore from "../../FetchMore";
 // Display individual repository
 import RepositoryItem from "../RepositoryItem";
+// Display Repository issue
 import Issues from "../../Issue";
+
 import "../style.css";
 
 // Update cache of results to be displayed

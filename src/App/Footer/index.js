@@ -1,20 +1,17 @@
-import React from 'react';
+import React from "react";
 
-import Link from '../../Link';
+import Link from "../../Link";
 
-import './style.css';
+import "./style.css";
 
 const Footer = () => (
   <div className="Footer">
     <div>
       <small>
-        <span className="Footer-text">Built by</span>{' '}
-        <Link
-          className="Footer-link"
-          href="https://www.robinwieruch.de"
-        >
-          Robin Wieruch
-        </Link>{' '}
+        <span className="Footer-text">Built by Bob Parsons based on </span>{" "}
+        <Link className="Footer-link" href="https://www.robinwieruch.de">
+          Robin Wieruch Guide
+        </Link>{" "}
         <span className="Footer-text">with &hearts;</span>
       </small>
     </div>
@@ -22,16 +19,16 @@ const Footer = () => (
       <small>
         <span className="Footer-text">
           Interested in GraphQL, Apollo and React?
-        </span>{' '}
+        </span>{" "}
         <Link
           className="Footer-link"
           href="https://www.getrevue.co/profile/rwieruch"
         >
           Get updates
-        </Link>{' '}
+        </Link>{" "}
         <span className="Footer-text">
-          about upcoming articles, books &
-        </span>{' '}
+          about upcoming articles, books &amp;
+        </span>{" "}
         <Link className="Footer-link" href="https://roadtoreact.com">
           courses
         </Link>

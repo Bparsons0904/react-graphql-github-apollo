@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 // Available route components
 import Navigation from "./Navigation";
+import Footer from "./Footer";
 import Profile from "../Profile";
 import Organization from "../Organization";
 // Contacts used for routes
@@ -51,6 +52,7 @@ class App extends Component {
               )}
             />
           </div>
+          <Footer />
         </div>
       </Router>
     );

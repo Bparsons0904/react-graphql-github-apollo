@@ -14,6 +14,7 @@ import FetchMore from "../../FetchMore";
 import ErrorMessage from "../../Error";
 // Borderless button
 import { ButtonUnobtrusive } from "../../Button";
+
 import "./style.css";
 
 // Query to retrieve issues for each repo
@@ -218,7 +219,12 @@ const IssueList = ({
   <div className="IssueList">
     {/* Loop through issues, create element for each node */}
     {issues.edges.map(({ node }) => (
-      <IssueItem key={node.id} issue={node} />
+      <IssueItem
+        key={node.id}
+        issue={node}
+        repositoryOwner={repositoryOwner}
+        repositoryName={repositoryName}
+      />
     ))}
 
     {/* Generate button to fetch next group of issues. */}
