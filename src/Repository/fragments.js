@@ -24,18 +24,4 @@ export const REPOSITORY_FRAGMENT = gql`
   }
 `;
 
-// Fragment to get Issue for comment update
-export const GET_ISSUE_OF_REPOSITORY = gql`
-  fragment issue on Issue {
-    id
-    comments {
-      edges {
-        node {
-          body
-        }
-      }
-    }
-  }
-`;
-
 export default REPOSITORY_FRAGMENT;

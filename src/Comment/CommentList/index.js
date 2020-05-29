@@ -13,6 +13,7 @@ import FetchMore from "../../FetchMore";
 import ErrorMessage from "../../Error";
 // Borderless button
 import { ButtonUnobtrusive } from "../../Button";
+import ISSUE_FRAGMENT from "../fragments";
 import "./style.css";
 
 // Query to retrieve issues for each repo
@@ -25,25 +26,11 @@ export const GET_COMMENTS_OF_REPOSITORY = gql`
   ) {
     repository(name: $repositoryName, owner: $repositoryOwner) {
       issue(number: $issueNumber) {
-        id
-        comments(first: 5, after: $cursor) {
-          edges {
-            node {
-              bodyText
-              id
-              author {
-                login
-              }
-            }
-          }
-          pageInfo {
-            endCursor
-            hasNextPage
-          }
-        }
+        ...issue
       }
     }
   }
+  ${ISSUE_FRAGMENT}
 `;
 
 // Update cache of results to be displayed

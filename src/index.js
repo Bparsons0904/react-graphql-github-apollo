@@ -39,7 +39,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 
 // Create link for error control
 const link = ApolloLink.from([new RetryLink(), errorLink, httpLink]);
-
+// Store results of query
 const cache = new InMemoryCache();
 // Create client class for Apollo
 const client = new ApolloClient({

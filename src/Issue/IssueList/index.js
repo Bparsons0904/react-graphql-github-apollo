@@ -18,7 +18,7 @@ import { ButtonUnobtrusive } from "../../Button";
 import "./style.css";
 
 // Query to retrieve issues for each repo
-export const GET_ISSUES_OF_REPOSITORY = gql`
+const GET_ISSUES_OF_REPOSITORY = gql`
   query(
     $repositoryOwner: String!
     $repositoryName: String!

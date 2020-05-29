@@ -4,8 +4,7 @@ import gql from "graphql-tag";
 import TextArea from "../../TextArea";
 import Button from "../../Button";
 import ErrorMessage from "../../Error";
-// import GET_ISSUE_OF_REPOSITORY from "../../Repository/fragments";
-// Add repository star by current user
+// import ISSUE_FRAGMENT from "../fragments";
 
 class CommentAdd extends Component {
   state = {
@@ -41,18 +40,21 @@ class CommentAdd extends Component {
   // ) => {
   //   // Get current cached values
   //   const issue = client.readFragment({
-  //     id: `Mutation:${this.state.issueId}`,
-  //     fragment: GET_ISSUE_OF_REPOSITORY,
+  //     id: `Issue:${this.state.issueId}`,
+  //     fragment: ISSUE_FRAGMENT,
   //   });
 
   //   // Update cache with current value
   //   client.writeFragment({
-  //     id: `Mutation:${this.state.issueId}`,
-  //     fragment: GET_ISSUE_OF_REPOSITORY,
+  //     id: `Issue:${this.state.issueId}`,
+  //     fragment: ISSUE_FRAGMENT,
   //     data: {
   //       ...issue,
+  //       comments: {
+  //         ...issue.comments,
+  //       },
   //       edges: {
-  //         ...issue.edges,
+  //         ...issue.comments.edges,
   //         node: {
   //           body: value,
   //         },
@@ -80,16 +82,14 @@ class CommentAdd extends Component {
       <Mutation
         mutation={ADD_COMMENT}
         variables={{ body: value, subjectId: issueId }}
-
         // TODO Complete optimistic UI
-
         // optimisticResponse={{
         //   addComment: {
         //     __typename: "Mutation",
         //     commentEdge: {
-        //       __typename: "addComment",
+        //       __typename: "Comment",
         //       node: {
-        //         __typename: "commentEdge",
+        //         __typename: "Body",
         //         body: value,
         //       },
         //     },
@@ -101,10 +101,10 @@ class CommentAdd extends Component {
           <div>
             {error && <ErrorMessage error={error} />}
 
-            <form onSubmit={(e) => this.onSubmit(e, addComment)}>
+            <form onSubmit={(event) => this.onSubmit(event, addComment)}>
               <TextArea
                 value={value}
-                onChange={(e) => this.onChange(e.target.value)}
+                onChange={(event) => this.onChange(event.target.value)}
                 placeholder="Leave a comment"
               />
               <Button type="submit">Comment</Button>
